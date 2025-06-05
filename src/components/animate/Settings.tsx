@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAnimateStore } from './_store';
+import { useAnimateStore } from './store';
 
 const Settings = () => {
   const [isOpen, setIsOpen] = useState(false);

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import Results from './_Results';
-import SearchForm from './_Search';
-import { useAnimateStore } from './_store';
+import Results from '@/components/animate/Results';
+import SearchForm from '@/components/animate/Search';
+import { useAnimateStore } from '@/components/animate/store';
 
 const Index: React.FC = () => {
   const bangumiResult = useAnimateStore(s => s.bangumiResult);

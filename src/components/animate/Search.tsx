@@ -7,8 +7,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { BangumiClient, Subject, SubjectType } from '@/third-services/bangumi';
-import { SearchFormValues, useAnimateStore } from './_store';
-import Settings from './_Settings';
+import { SearchFormValues, useAnimateStore } from './store';
+import Settings from './Settings';
 
 const labels = {
   tv: 'TV',

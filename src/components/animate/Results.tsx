@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAnimateStore } from './_store';
+import { useAnimateStore } from './store';
 
 const filterFormSchema = z.object({
   sort: z.enum(['year', 'score', 'popular']),

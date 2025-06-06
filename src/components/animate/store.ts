@@ -17,6 +17,8 @@ interface State {
   isLoading: boolean;
   bangumiResult: Bangumi.Subject[];
   formState: SearchFormValues;
+  sort: 'date' | 'score' | 'total rating';
+  format: string;
 
   // in localstorage
   bangumiToken: string;
@@ -37,7 +39,8 @@ export const useAnimateStore = create<State & Actions>()(persist((set) => ({
     ova: false,
     movie: false,
   },
-  filterState: { sort: 'score' },
+  sort: 'score',
+  format: '',
 
   // actions
   update: set,

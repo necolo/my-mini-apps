@@ -36,7 +36,7 @@ const Settings = () => {
         <Button
           variant="outline"
           size="icon"
-          className="border-slate-600 bg-slate-800/50 hover:bg-slate-700/50 text-slate-300"
+          className="border-slate-600 bg-slate-800/50 hover:bg-slate-100/50 text-slate-300"
         >
           <SettingsIcon className="h-4 w-4" />
         </Button>

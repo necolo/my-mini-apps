@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Results from '@/components/animate/Results';
 import SearchForm from '@/components/animate/Search';
 import { useAnimateStore } from '@/components/animate/store';
+import HomeButton from '@/components/HomeButton';
 
 const Index: React.FC = () => {
   const bangumiResult = useAnimateStore(s => s.bangumiResult);
@@ -36,7 +37,6 @@ const Index: React.FC = () => {
             {/* Paste your anime list and get comprehensive data from multiple sources instantly */}
           </p>
         </div>
-
         <div className="max-w-4xl mx-auto space-y-8">
           {hydrated && (
             <>
@@ -45,6 +45,7 @@ const Index: React.FC = () => {
             </>
           )}
         </div>
+        <HomeButton />
       </div>
     </div>
   );

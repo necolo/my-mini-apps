@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>福岛核处理水排放：交互式解读报告</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Neutrals (Slate, Blue, Teal) -->
+    <!-- Application Structure Plan: The SPA is designed as a thematic, single-page dashboard. The user journey begins with a clear introduction, followed by a sticky navigation bar (Scientific Facts, Food Safety, Data Comparison, FAQ) for non-linear exploration. This structure moves from foundational science to personal concerns (food safety), then provides broader context (data comparison), and finally answers specific queries (FAQ). This flow is designed to guide the user from understanding the core issues to forming an informed opinion based on interactive data visualizations and concise explanations, making complex information accessible and digestible. -->
+    <!-- Visualization & Content Choices: Report data is presented through interactive Chart.js bar charts to compare radionuclide concentrations against standards (Goal: Compare, Justification: Clarity) and to compare tritium emissions across global facilities (Goal: Compare, Justification: Context). The treatment process is shown as an interactive HTML/CSS diagram (Goal: Organize, Justification: Engagement). FAQs use a JS-powered accordion for conciseness (Goal: Organize, Justification: Usability). All choices avoid SVG/Mermaid as required. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 800px;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+        }
+        .faq-question.open .arrow {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold text-blue-700">核处理水排放解读</h1>
+            <div class="hidden md:flex space-x-6">
+                <a href="#science" class="nav-link font-medium pb-1">科学解读</a>
+                <a href="#food-safety" class="nav-link font-medium pb-1">食品安全</a>
+                <a href="#comparison" class="nav-link font-medium pb-1">数据对比</a>
+                <a href="#faq" class="nav-link font-medium pb-1">常见问题</a>
+            </div>
+            <div class="md:hidden">
+                <select id="mobile-nav" class="bg-gray-100 border border-gray-300 rounded-md p-2 text-sm">
+                    <option value="#hero">首页</option>
+                    <option value="#science">科学解读</option>
+                    <option value="#food-safety">食品安全</option>
+                    <option value="#comparison">数据对比</option>
+                    <option value="#faq">常见问题</option>
+                </select>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+
+        <section id="hero" class="text-center py-12">
+            <h2 class="text-4xl font-bold mb-4 text-slate-900">全面审视日本福岛核处理水排放</h2>
+            <p class="max-w-3xl mx-auto text-lg text-slate-600">
+                自2023年8月起，日本开始将福岛第一核电站经过处理的核事故水排入海洋。此举引发全球广泛关注与激烈辩论。本应用旨在通过科学数据和多维视角，为您提供一个客观、全面的交互式解读，帮助您了解事实、评估风险。
+            </p>
+        </section>
+
+        <div class="space-y-24">
+
+            <section id="science" class="scroll-mt-20">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-slate-900">科学解读：处理过程与安全标准</h3>
+                    <p class="max-w-2xl mx-auto mt-2 text-slate-600">福岛核处理水经过了怎样的净化？排放标准是否严格？国际社会如何监督？本节将为您深入解析背后的科学原理和监管体系。</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md mb-12">
+                    <h4 class="text-2xl font-bold mb-4 text-center">从“污染水”到“处理水”：ALPS净化与稀释流程</h4>
+                    <p class="text-center text-slate-600 mb-6">了解核事故水排放前的关键步骤。这是一个多阶段的净化和稀释过程，旨在最大程度降低放射性物质浓度。</p>
+                    <div class="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4">
+                        <div class="text-center p-4 rounded-lg bg-slate-100 w-full md:w-1/4">
+                            <div class="text-4xl mb-2">💧</div>
+                            <h5 class="font-bold text-lg">1. 核污染水</h5>
+                            <p class="text-sm text-slate-600">直接接触熔毁堆芯，含有多种放射性核素。</p>
+                        </div>
+                        <div class="text-2xl text-slate-400 font-bold transform rotate-90 md:rotate-0">→</div>
+                        <div class="text-center p-4 rounded-lg bg-blue-100 w-full md:w-1/4">
+                            <div class="text-4xl mb-2">🔬</div>
+                            <h5 class="font-bold text-lg">2. ALPS处理</h5>
+                            <p class="text-sm text-slate-600">“多核素处理系统”可去除氚以外的62种放射性核素。</p>
+                        </div>
+                        <div class="text-2xl text-slate-400 font-bold transform rotate-90 md:rotate-0">→</div>
+                        <div class="text-center p-4 rounded-lg bg-teal-100 w-full md:w-1/4">
+                           <div class="text-4xl mb-2">🌊</div>
+                            <h5 class="font-bold text-lg">3. 大量海水稀释</h5>
+                            <p class="text-sm text-slate-600">将处理水稀释100倍以上，使氚浓度远低于标准。</p>
+                        </div>
+                        <div class="text-2xl text-slate-400 font-bold transform rotate-90 md:rotate-0">→</div>
+                        <div class="text-center p-4 rounded-lg bg-green-100 w-full md:w-1/4">
+                            <div class="text-4xl mb-2">✅</div>
+                            <h5 class="font-bold text-lg">4. 达标排放</h5>
+                            <p class="text-sm text-slate-600">在IAEA监督下，符合国际安全标准后排入海洋。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h4 class="text-2xl font-bold mb-2 text-center">放射性核素浓度 vs. 安全标准</h4>
+                     <p class="text-center text-slate-600 mb-6">ALPS系统处理后的水中主要残留的放射性核素是氚。下图展示了排放前处理水的氚浓度与各项安全标准的对比。数据显示，经过稀释后，其目标浓度远低于日本国内及世界卫生组织的饮用水标准。</p>
+                    <div class="chart-container">
+                        <canvas id="radionuclideChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="food-safety" class="scroll-mt-20">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-slate-900">食品安全：日本海产品还能吃吗？</h3>
+                    <p class="max-w-2xl mx-auto mt-2 text-slate-600">排放对海洋生态和食品链有何影响？这是公众最为关心的问题。本节将分析日本的食品安全标准、监测数据以及消费建议。</p>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h4 class="text-2xl font-bold mb-4 text-center">更严格的国内标准</h4>
+                        <p class="text-center text-slate-600 mb-6">日本对食品中放射性铯的标准限值（100 Bq/kg）比国际食品法典委员会（CODEX）的标准（1000 Bq/kg）严格十倍。这为食品安全提供了更高的保障基准。</p>
+                        <div class="chart-container h-64 max-h-[30vh]">
+                            <canvas id="standardsChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center">
+                        <h4 class="text-2xl font-bold mb-4 text-center">消费建议与“风评被害”</h4>
+                        <div class="space-y-4 text-slate-700">
+                             <p><strong>科学评估：</strong>根据IAEA和多国科学家的评估，在严格遵守排放标准和监测的前提下，食用符合标准的海产品所带来的放射性风险极低。</p>
+                             <p><strong>长期监测：</strong>尽管即时风险低，但对长期生物富集的担忧依然存在，这需要持续、透明的国际监测。</p>
+                             <p><strong>知情选择：</strong>消费者可以关注官方发布的监测数据，选择来自可信赖渠道和远离排放区域的海产品，做出知情的个人选择。</p>
+                             <p><strong>经济影响：</strong>需要区分科学风险和“风评被害”。公众的担忧对日本渔业和相关产业造成了巨大的经济冲击，这种影响有时会超越实际的科学风险。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="comparison" class="scroll-mt-20">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-slate-900">数据对比：全球核设施氚排放量</h3>
+                    <p class="max-w-3xl mx-auto mt-2 text-slate-600">将福岛的计划排放量与其他国家核电站的实际排放量进行比较，可以为我们提供更广阔的视角。但请注意，水体来源的本质区别是理解这些数据的关键。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md mb-6" role="alert">
+                      <p class="font-bold">重要背景：本质区别</p>
+                      <p>福岛处理水是直接接触过熔毁堆芯的“事故水”，含有更多样的放射性核素。而其他核电站排放的是正常运行产生的废水，未直接接触核燃料。因此，单纯进行氚含量的定量比较可能会忽略这一关键的质性差异。</p>
+                    </div>
+                    <h4 class="text-2xl font-bold mb-4 text-center">部分核设施年氚排放量对比 (TBq)</h4>
+                    <div class="chart-container">
+                        <canvas id="tritiumChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="faq" class="scroll-mt-20">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl font-bold text-slate-900">常见问题解答 (FAQ)</h3>
+                    <p class="max-w-2xl mx-auto mt-2 text-slate-600">我们整理了报告中涉及的一些核心问题，希望能解答您的疑惑。</p>
+                </div>
+                <div id="faq-container" class="max-w-3xl mx-auto space-y-4">
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-20">
+        <div class="container mx-auto px-4 py-8 text-center">
+            <p>本应用信息整理自《日本福岛核处理水排放：科学评估、食品安全与国际比较报告》。</p>
+            <p class="text-sm text-slate-400 mt-2">旨在提供一个基于数据的交互式概览，鼓励用户从多角度理性看待复杂问题。所有数据请以官方发布为准。</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const radionuclideData = {
+                labels: ['ALPS处理后(未稀释)', 'WHO饮用水标准', '日本管制标准', '稀释后排放目标'],
+                datasets: [{
+                    label: '氚浓度 (Bq/L)',
+                    data: [730000, 10000, 60000, 1500],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.6)',
+                        'rgba(54, 162, 235, 0.6)',
+                        'rgba(255, 206, 86, 0.6)',
+                        'rgba(75, 192, 192, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const radionuclideChartCtx = document.getElementById('radionuclideChart').getContext('2d');
+            new Chart(radionuclideChartCtx, {
+                type: 'bar',
+                data: radionuclideData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: '氚浓度对数坐标(Bq/L) - 数值越高不代表越危险，需与标准对比'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += context.parsed.x.toLocaleString() + ' Bq/L';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                           type: 'logarithmic',
+                           title: {
+                                display: true,
+                                text: '浓度 (贝克勒尔/升) - 对数刻度'
+                           }
+                        }
+                    }
+                }
+            });
+
+            const standardsData = {
+                labels: ['日本标准', '国际食品法典(CODEX)标准'],
+                datasets: [{
+                    label: '放射性铯限值 (Bq/kg)',
+                    data: [100, 1000],
+                    backgroundColor: ['rgba(75, 192, 192, 0.6)', 'rgba(255, 159, 64, 0.6)'],
+                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 159, 64, 1)'],
+                    borderWidth: 1
+                }]
+            };
+            const standardsChartCtx = document.getElementById('standardsChart').getContext('2d');
+            new Chart(standardsChartCtx, {
+                type: 'bar',
+                data: standardsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                           display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '限值 (Bq/kg)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const tritiumData = {
+                labels: ['福岛计划上限', '台湾核三厂', '韩国月城', '中国宁德', '中国阳江', '中国秦山第三'],
+                datasets: [{
+                    label: '年氚排放量 (TBq)',
+                    data: [22, 35, 70, 98, 110, 143],
+                    backgroundColor: [
+                        'rgba(239, 68, 68, 0.6)',
+                        'rgba(59, 130, 246, 0.6)',
+                        'rgba(59, 130, 246, 0.6)',
+                        'rgba(59, 130, 246, 0.6)',
+                        'rgba(59, 130, 246, 0.6)',
+                        'rgba(59, 130, 246, 0.6)'
+                    ],
+                    borderColor: [
+                        'rgba(239, 68, 68, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(59, 130, 246, 1)',
+                        'rgba(59, 130, 246, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            const tritiumChartCtx = document.getElementById('tritiumChart').getContext('2d');
+            new Chart(tritiumChartCtx, {
+                type: 'bar',
+                data: tritiumData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                           display: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: '万亿贝克勒尔 (TBq)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const faqs = [
+                {
+                    question: '福岛“核处理水”和普通核电站的“废水”有什么本质区别？',
+                    answer: '最大的区别在于来源。福岛的水直接接触过熔毁的核燃料，因此除了氚，还含有锶-90、铯-137等多种高毒性、长半衰期的放射性核素，这是“事故水”。而普通核电站正常运行产生的废水，未接触核燃料，主要含氚，其放射性核素种类和毒性远低于事故水。'
+                },
+                {
+                    question: '既然处理和稀释后是安全的，为什么不留在日本国内使用？',
+                    answer: '这是一个引起广泛质疑的问题。日本政府给出的解释是，将处理水用于农业或工业在技术和成本上存在挑战，且缺乏相关法规支持。然而，公众普遍认为，如果水真的绝对安全，理应首先考虑国内循环利用，而不是排入全球共享的海洋。这种认知差异是导致不信任的重要原因。'
+                },
+                {
+                    question: '我还能吃日本的生鱼片和海鲜吗？',
+                    answer: '从科学角度看，目前日本市场流通并符合其严格标准（比国际标准更严）的海产品，其即时放射性风险被认为是极低的。排放开始后的监测也未发现异常。但长期来看，对生物富集的担忧依然存在。消费者可以关注官方监测数据，并根据个人风险偏好做出知情选择。一些国家（如中国）出于审慎原则采取了进口限制，这其中也包含了政治因素。'
+                },
+                {
+                    question: '国际原子能机构（IAEA）的评估可信吗？',
+                    answer: 'IAEA是全球核安全领域的最高权威机构，其评估结论认为日本的排放计划符合国际安全标准，对环境和人类的放射性影响“可以忽略不计”。其评估团队包含来自中国、韩国、俄罗斯等多个国家的专家。尽管如此，一些国家和环保组织仍对其公正性、评估范围的全面性提出质疑，认为未能充分考虑长期累积效应。'
+                },
+                 {
+                    question: '为什么一些中国核电站的氚排放量比福岛还高？',
+                    answer: '是的，数据显示部分中国核电站的氚年排放量高于福岛的计划上限。但这正是需要区分“量”和“质”的地方。中国等国的核电站排放的是正常运行产生的废水，成分相对单一。而福岛排放的是“事故水”，即使经过处理，其所含的放射性核素种类也更为复杂和危险。因此，不能简单地用氚的排放量来等同于两者的风险。'
+                }
+            ];
+            
+            const faqContainer = document.getElementById('faq-container');
+            faqs.forEach(faq => {
+                const faqItem = document.createElement('div');
+                faqItem.className = 'bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden';
+                faqItem.innerHTML = `
+                    <button class="faq-question w-full text-left p-4 flex justify-between items-center font-medium text-lg hover:bg-slate-50 transition">
+                        <span>${faq.question}</span>
+                        <span class="arrow text-2xl text-slate-500 transition-transform duration-300">↓</span>
+                    </button>
+                    <div class="faq-answer hidden p-4 border-t border-slate-200 bg-slate-50">
+                        <p class="text-slate-600">${faq.answer}</p>
+                    </div>
+                `;
+                faqContainer.appendChild(faqItem);
+            });
+
+            faqContainer.addEventListener('click', (e) => {
+                const questionButton = e.target.closest('.faq-question');
+                if (questionButton) {
+                    questionButton.classList.toggle('open');
+                    const answer = questionButton.nextElementSibling;
+                    answer.classList.toggle('hidden');
+                }
+            });
+            
+            const mobileNav = document.getElementById('mobile-nav');
+            mobileNav.addEventListener('change', () => {
+                window.location.href = mobileNav.value;
+            });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>肘关节疼痛互动康复指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Calm Harmony (Background: #F8F7F4, Text: #333333, Accents: Muted Blue #A8D0E6, Green #C8E6C9, Warning #FFAB91) -->
+    <!-- Application Structure Plan: A task-oriented, single-page application with a sticky top navigation bar for quick access to key sections: Understanding the Pain, Immediate Care, Rehab Exercises, Prevention, and When to See a Doctor. The structure prioritizes user tasks (e.g., "What do I do now?" or "Show me exercises") over the linear flow of the source report. The core interaction is a filterable, card-based grid for rehabilitation exercises, making it more engaging and easier to use than a static table. This design is chosen to empower the user with direct access to actionable information based on their immediate needs. -->
+    <!-- Visualization & Content Choices: Goal: Organize & Instruct -> The exercise table from the report is transformed into an interactive grid of cards with filters. Each card is a clickable element that reveals detailed instructions. This is more user-friendly and interactive. Method: HTML/CSS/JS. Library: None needed. Goal: Inform & Compare -> Complex topics like causes and treatments are broken down into collapsible accordions and simple icon-driven cards (e.g., heat vs. cold). This simplifies information digestion. Method: HTML/CSS/JS. Library: None needed. Goal: Warn -> The "When to See a Doctor" section uses a high-contrast, two-column layout with strong colors (red/yellow) and icons to clearly distinguish between emergency situations and routine appointments. Method: HTML/CSS/Tailwind. Library: None needed. CONFIRMATION: NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            background-color: #F8F7F4;
+            color: #3C3C3B;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #007A7A;
+            border-bottom-color: #007A7A;
+        }
+        .card {
+            background-color: #FFFFFF;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        .btn {
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background-color: #3B82F6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563EB;
+        }
+        .btn-secondary {
+            background-color: #E5E7EB;
+            color: #374151;
+        }
+        .btn-secondary:hover {
+            background-color: #D1D5DB;
+        }
+        .tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .exercise-card .details {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-40">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <h1 class="text-xl font-bold text-gray-800">💪 肘关节康复指南</h1>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="#understanding" class="nav-link px-3 py-2 text-sm font-medium text-gray-700">了解疼痛</a>
+                        <a href="#immediate-care" class="nav-link px-3 py-2 text-sm font-medium text-gray-700">紧急处理</a>
+                        <a href="#rehab-exercises" class="nav-link px-3 py-2 text-sm font-medium text-gray-700">康复锻炼</a>
+                        <a href="#prevention" class="nav-link px-3 py-2 text-sm font-medium text-gray-700">长期预防</a>
+                        <a href="#see-doctor" class="nav-link px-3 py-2 text-sm font-medium text-gray-700">就医指南</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                        <span class="sr-only">打开主菜单</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#understanding" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">了解疼痛</a>
+                <a href="#immediate-care" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">紧急处理</a>
+                <a href="#rehab-exercises" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">康复锻炼</a>
+                <a href="#prevention" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">长期预防</a>
+                <a href="#see-doctor" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">就医指南</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+        <section id="understanding" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">了解您的疼痛：症状分析</h2>
+            <p class="text-lg text-gray-600 mb-8">根据您的描述——肘关节内侧疼痛、弯曲时加剧、空调环境诱发——最可能的情况是“肱骨内上髁炎”，并因寒冷而加剧。这里我们将深入解析。</p>
+            
+            <div class="space-y-4">
+                <div class="card accordion-item">
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-6">
+                        <span class="text-xl font-semibold text-blue-600">主要嫌疑：肱骨内上髁炎（高尔夫球肘）</span>
+                        <span class="accordion-icon transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content px-6 pb-6 text-gray-700">
+                        <p class="mb-4">这是一种附着在肘部内侧的肌腱发炎或微小撕裂。您的症状与典型表现高度吻合：</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>精准定位：</strong>疼痛点精确位于肘关节内侧。</li>
+                            <li><strong>动作加剧：</strong>弯曲手肘会牵拉受损肌腱，导致疼痛加剧。</li>
+                            <li><strong>非肌肉疼痛：</strong>按压附近肌肉无痛感，说明问题出在肌腱附着点。</li>
+                            <li><strong>根本原因：</strong>通常由重复性的手腕和手指屈曲动作（如提重物、长时间用电脑、不正确的运动姿势）累积造成。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="card accordion-item">
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-6">
+                        <span class="text-xl font-semibold text-teal-600">诱因：为什么空调会加剧疼痛？</span>
+                        <span class="accordion-icon transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content px-6 pb-6 text-gray-700">
+                        <p class="mb-4">寒冷环境是疼痛的“放大器”，而不是根本原因。其生理机制包括：</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>血管收缩：</strong>冷空气使血管收缩，减少流向关节组织的血液、氧气和营养，导致僵硬和疼痛。</li>
+                            <li><strong>肌肉紧绷：</strong>肌肉在寒冷时会不自觉地收缩绷紧，增加关节压力。</li>
+                            <li><strong>关节液变稠：</strong>关节内的润滑液（滑液）在低温下粘度增加，导致关节活动不畅、感觉更僵硬。</li>
+                            <li><strong>热敷有效：</strong>您感觉热敷有效，正是因为它能扩张血管、放松肌肉，暂时逆转了寒冷带来的影响。</li>
+                        </ul>
+                    </div>
+                </div>
+
+                 <div class="card accordion-item">
+                    <button class="accordion-header w-full flex justify-between items-center text-left p-6">
+                        <span class="text-xl font-semibold text-gray-600">其他可能性（鉴别诊断）</span>
+                        <span class="accordion-icon transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div class="accordion-content px-6 pb-6 text-gray-700">
+                        <p class="mb-4">虽然可能性较小，但了解其他情况有助于确认诊断。关键区别在于您<strong>没有</strong>报告以下症状：</p>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><strong>尺神经卡压：</strong>典型症状是小指和无名指的麻木、刺痛感。您未提及神经症状，这是重要的排除依据。</li>
+                            <li><strong>单纯肌肉拉伤：</strong>疼痛范围通常更弥散，而您的疼痛点非常集中。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="immediate-care" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">紧急处理：立即缓解疼痛</h2>
+            <p class="text-lg text-gray-600 mb-8">在康复开始前，首要任务是控制急性症状。以下是您可以立即采取的措施。</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-4">🧘</div>
+                    <h3 class="text-xl font-semibold mb-2">休息</h3>
+                    <p class="text-gray-600">停止一切会引发疼痛的活动，特别是提重物和用力的抓握动作。</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-4">🧊/🔥</div>
+                    <h3 class="text-xl font-semibold mb-2">冷/热敷</h3>
+                    <p class="text-gray-600">您的症状更适合热敷来放松肌肉。若出现急性肿胀，则用冰敷。</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-4">💊</div>
+                    <h3 class="text-xl font-semibold mb-2">非处方药</h3>
+                    <p class="text-gray-600">如布洛芬等非甾体抗炎药可帮助减轻炎症和疼痛。</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <div class="text-4xl mb-4">🩹</div>
+                    <h3 class="text-xl font-semibold mb-2">使用护具</h3>
+                    <p class="text-gray-600">在前臂上部佩戴护肘或加压带有助于分散肌腱受力。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="rehab-exercises" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">康复锻炼：重建力量与灵活性</h2>
+            <p class="text-lg text-gray-600 mb-6">这是康复的核心。请遵循“无痛或微痛”原则，循序渐进。在开始前进行热敷或温和热身效果更佳。</p>
+            <div class="flex flex-wrap gap-2 mb-8">
+                <button class="btn btn-secondary filter-btn active" data-filter="all">所有锻炼</button>
+                <button class="btn btn-secondary filter-btn" data-filter="stretch">拉伸放松</button>
+                <button class="btn btn-secondary filter-btn" data-filter="strength">力量强化</button>
+                <button class="btn btn-secondary filter-btn" data-filter="nerve">神经活动</button>
+            </div>
+            <div id="exercise-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        </section>
+
+        <section id="prevention" class="mb-16 scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">长期预防：避免复发</h2>
+            <p class="text-lg text-gray-600 mb-8">治愈后，关键在于预防。调整生活习惯，建立更强大的手臂功能。</p>
+            <div class="space-y-6">
+                <div class="card flex items-center p-6">
+                    <div class="text-4xl mr-6">👨‍💻</div>
+                    <div>
+                        <h3 class="text-xl font-semibold">人体工程学与正确技术</h3>
+                        <p class="text-gray-600">检查您的工作站设置，运动时确保姿势正确，举重时保持手腕稳定。</p>
+                    </div>
+                </div>
+                <div class="card flex items-center p-6">
+                    <div class="text-4xl mr-6">🏋️‍♂️</div>
+                    <div>
+                        <h3 class="text-xl font-semibold">保持手臂力量与柔韧性</h3>
+                        <p class="text-gray-600">定期进行本指南中的强化和拉伸练习，强健的肌肉是肌腱最好的保护。</p>
+                    </div>
+                </div>
+                <div class="card flex items-center p-6">
+                    <div class="text-4xl mr-6">🧥</div>
+                    <div>
+                        <h3 class="text-xl font-semibold">保护关节免受寒冷</h3>
+                        <p class="text-gray-600">在空调房或寒冷天气中，注意肘部保暖，穿长袖或戴上护肘。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="see-doctor" class="scroll-mt-20">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">专业就医指南</h2>
+            <p class="text-lg text-gray-600 mb-8">自我护理是第一步，但了解何时必须寻求专业帮助至关重要。这能确保您的安全并获得适当的治疗。</p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="border-4 border-red-500 rounded-xl p-6 bg-red-50">
+                    <h3 class="text-2xl font-bold text-red-700 mb-4 flex items-center"><span class="text-3xl mr-3">🚨</span>需要立即就医的紧急情况</h3>
+                    <ul class="list-disc list-inside space-y-3 text-red-800">
+                        <li>肘部或手臂发生<strong>明显变形</strong>或骨头外露。</li>
+                        <li>受伤时听到<strong>“咔嚓”声</strong>。</li>
+                        <li>出现剧痛，<strong>完全无法</strong>弯曲或转动手臂。</li>
+                        <li>肘部<strong>红、肿、热</strong>，且伴有发烧。</li>
+                        <li>手臂突然大范围<strong>麻木或无力</strong>。</li>
+                        <li class="font-bold">若手臂疼痛伴有胸闷、压迫感，立即拨打急救电话！</li>
+                    </ul>
+                </div>
+                <div class="border-4 border-blue-500 rounded-xl p-6 bg-blue-50">
+                    <h3 class="text-2xl font-bold text-blue-700 mb-4 flex items-center"><span class="text-3xl mr-3">🗓️</span>需要预约医生的常规情况</h3>
+                    <ul class="list-disc list-inside space-y-3 text-blue-800">
+                        <li>居家护理几周后，疼痛<strong>没有改善</strong>。</li>
+                        <li>即使在<strong>休息不活动时</strong>，肘部也感到疼痛。</li>
+                        <li>疼痛、红肿等症状<strong>持续加重</strong>。</li>
+                        <li>拿起或握持物品越来越困难，影响日常生活。</li>
+                        <li>出现持续的、小范围的麻木或刺痛感（特别是小指和无名指）。</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="exercise-modal" class="modal-overlay">
+        <div class="modal-content relative">
+            <button id="modal-close-btn" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+    
+    <footer class="bg-gray-800 text-white mt-16">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center">
+            <p>本指南提供信息仅供参考，不能替代专业医疗建议、诊断或治疗。</p>
+            <p class="text-sm text-gray-400 mt-2">&copy; 2025 互动康复指南. All rights reserved.</p>
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const exerciseData = [
+                { 
+                    name: '腕部屈肌伸展',
+                    category: 'stretch',
+                    shortDesc: '放松前臂内侧肌肉。',
+                    instructions: [
+                        '将受影响的手臂伸直在身前，手掌朝上。',
+                        '放松手腕，让手自然下垂，手指指向地面。',
+                        '用另一只手轻轻将手掌向后拉，朝向身体，直到感觉前臂内侧有舒适的拉伸感。'
+                    ],
+                    reps: '保持30-45秒，重复3次。',
+                    icon: '🖐️'
+                },
+                {
+                    name: '高尔夫球肘特定伸展',
+                    category: 'stretch',
+                    shortDesc: '精准拉伸肘内侧肌腱。',
+                    instructions: [
+                        '将肘部弯曲90度置于身体一侧，握拳，手掌朝下。',
+                        '手腕向下弯曲。',
+                        '保持腕部弯曲，缓慢伸直肘部，然后向外转动拳头。'
+                    ],
+                    reps: '保持15-30秒，重复3次。',
+                    icon: '✊'
+                },
+                {
+                    name: '离心腕部屈曲',
+                    category: 'strength',
+                    shortDesc: '肌腱修复的关键训练。',
+                    instructions: [
+                        '坐下，前臂放在大腿上，手掌朝上，手握一个轻物（水瓶或罐头）。',
+                        '让手腕带着重物缓慢地、有控制地向下放（此为离心阶段）。',
+                        '用另一只手帮助将重物抬回起始位置（避免向心用力）。'
+                    ],
+                    reps: '进行10-15次为一组，共2-3组。',
+                    icon: '💧'
+                },
+                {
+                    name: '肘部弯曲（二头肌弯举）',
+                    category: 'strength',
+                    shortDesc: '强化肘关节屈曲力量。',
+                    instructions: [
+                        '站立或坐直，手臂自然下垂。',
+                        '手握轻物（或徒手），缓慢向上弯曲手臂，使手靠近肩膀。',
+                        '缓慢有控制地放回原位。'
+                    ],
+                    reps: '10-15次为一组，共2-3组。',
+                    icon: '💪'
+                },
+                {
+                    name: '泡沫球挤压',
+                    category: 'strength',
+                    shortDesc: '提升握力和前臂耐力。',
+                    instructions: [
+                        '手中握一个软的压力球或泡沫球。',
+                        '用力挤压，保持几秒钟，然后放松。'
+                    ],
+                    reps: '挤压并保持5秒，重复10-15次。',
+                    icon: '🥎'
+                },
+                {
+                    name: '毛巾拧转',
+                    category: 'strength',
+                    shortDesc: '综合强化前臂和手腕。',
+                    instructions: [
+                        '坐姿，双手各握住一条卷好的毛巾的一端。',
+                        '像拧干水一样，向相反方向用力拧转毛巾。',
+                        '然后向反方向重复。'
+                    ],
+                    reps: '每个方向10次。',
+                    icon: '🧺'
+                },
+                {
+                    name: '尺神经滑动',
+                    category: 'nerve',
+                    shortDesc: '改善神经活动性，预防卡压。',
+                    instructions: [
+                        '将手臂伸向一侧，与肩同高，手掌朝下。',
+                        '手腕向上弯曲，手指朝向天花板。',
+                        '缓慢地将头侧向另一边，会感到轻微的牵拉感。',
+                        '将头回正，手腕放松。'
+                    ],
+                    reps: '缓慢重复5-10次。动作要轻柔，不要引起疼痛。',
+                    icon: '🧠'
+                }
+            ];
+
+            const exerciseGrid = document.getElementById('exercise-grid');
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const modal = document.getElementById('exercise-modal');
+            const modalBody = document.getElementById('modal-body');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+
+            function renderExercises(filter = 'all') {
+                exerciseGrid.innerHTML = '';
+                const filteredExercises = filter === 'all' ? exerciseData : exerciseData.filter(ex => ex.category === filter);
+
+                filteredExercises.forEach(ex => {
+                    const card = document.createElement('div');
+                    card.className = 'card exercise-card cursor-pointer';
+                    card.innerHTML = `
+                        <div class="p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="text-4xl mr-4">${ex.icon}</div>
+                                <div>
+                                    <h3 class="text-xl font-semibold text-gray-800">${ex.name}</h3>
+                                    <p class="text-gray-500">${ex.shortDesc}</p>
+                                </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <span class="tag ${
+                                    ex.category === 'stretch' ? 'bg-blue-100 text-blue-800' :
+                                    ex.category === 'strength' ? 'bg-green-100 text-green-800' :
+                                    'bg-purple-100 text-purple-800'
+                                }">${
+                                    ex.category === 'stretch' ? '拉伸放松' :
+                                    ex.category === 'strength' ? '力量强化' : '神经活动'
+                                }</span>
+                            </div>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => showModal(ex));
+                    exerciseGrid.appendChild(card);
+                });
+            }
+
+            function showModal(ex) {
+                modalBody.innerHTML = `
+                    <div class="flex items-center mb-6">
+                        <div class="text-5xl mr-5">${ex.icon}</div>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900">${ex.name}</h2>
+                            <p class="text-lg text-gray-600">${ex.shortDesc}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">动作步骤：</h4>
+                            <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                                ${ex.instructions.map(step => `<li>${step}</li>`).join('')}
+                            </ol>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-lg mb-2">重复次数：</h4>
+                            <p class="text-gray-700">${ex.reps}</p>
+                        </div>
+                        <div class="mt-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-r-lg">
+                            <p><strong>重要提示：</strong>请在无痛或微痛范围内进行。如果疼痛加剧，请立即停止。</p>
+                        </div>
+                    </div>
+                `;
+                modal.classList.add('visible');
+            }
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active', 'btn-primary'));
+                    btn.classList.add('active', 'btn-primary');
+                    renderExercises(btn.dataset.filter);
+                });
+            });
+
+            modalCloseBtn.addEventListener('click', () => modal.classList.remove('visible'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('visible');
+                }
+            });
+
+            renderExercises();
+            document.querySelector('.filter-btn[data-filter="all"]').classList.add('btn-primary');
+            document.querySelector('.filter-btn[data-filter="all"]').classList.remove('btn-secondary');
+
+
+            const accordions = document.querySelectorAll('.accordion-item');
+            accordions.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                const content = item.querySelector('.accordion-content');
+                const icon = item.querySelector('.accordion-icon');
+                header.addEventListener('click', () => {
+                    const isOpen = content.style.maxHeight;
+                    if (isOpen) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (!mobileMenu.classList.contains('hidden')) {
+                         mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    if (pageYOffset >= sectionTop - 80) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').includes(current)) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

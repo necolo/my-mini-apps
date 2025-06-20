@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>科学护肤互动指南</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A problem-oriented, single-page application. The structure prioritizes user tasks over the original report's linear format. It starts with a holistic overview of foundational care. Users then navigate via a sticky top bar to sections dedicated to their primary concerns: 'Blackheads & Pores', 'Whitening & Tone', and 'Anti-wrinkle'. Each section follows a "Understand -> Home Solutions -> Pro Solutions" flow, using interactive cards and comparison charts to make complex information digestible and actionable. This user-centric design avoids overwhelming the user and guides them to relevant solutions efficiently. -->
+    <!-- Visualization & Content Choices: 
+        - Holistic Care Diagram: Goal=Organize/Inform. Method=HTML/CSS Flexbox diagram. Interaction=Hover highlights. Justification=Visually connects foundational concepts (cleanse, moisturize, protect) to all skin issues.
+        - Problem Cause Diagram: Goal=Inform. Method=HTML/CSS simple animation. Interaction=None. Justification=Simplifies complex biological processes (e.g., pore clogging) into an easy-to-grasp visual.
+        - Ingredient/Treatment Cards: Goal=Organize/Inform. Method=HTML/CSS cards. Interaction=Click to expand/show modal with details. Justification=Presents a large amount of information on demand, keeping the UI clean.
+        - Comparison Chart: Goal=Compare. Method=Chart.js Radar Chart. Interaction=Users select items to compare, chart updates dynamically. Justification=Provides a quick, multi-dimensional comparison of solutions, aiding decision-making.
+        - All diagrams and icons are created using HTML/CSS and Unicode characters.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
+    -->
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: #F8F7F4;
+            color: #343A40;
+        }
+        .nav-button.active {
+            background-color: #A3B18A;
+            color: white;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 40vh;
+        }
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-content {
+            transition: transform 0.3s ease;
+        }
+        .section-fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-lg shadow-sm">
+        <div class="container mx-auto px-4">
+            <nav class="flex items-center justify-between h-16">
+                <h1 class="text-xl md:text-2xl font-bold text-[#343A40]">科学护肤指南</h1>
+                <div class="hidden md:flex space-x-2">
+                    <button data-target="home" class="nav-button active px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-[#A3B18A]/80 hover:text-white">护肤总览</button>
+                    <button data-target="pores" class="nav-button px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-[#A3B18A]/80 hover:text-white">黑头与毛孔</button>
+                    <button data-target="whitening" class="nav-button px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-[#A3B18A]/80 hover:text-white">美白与肤色</button>
+                    <button data-target="wrinkles" class="nav-button px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 hover:bg-[#A3B18A]/80 hover:text-white">抗皱与嫩肤</button>
+                </div>
+                <div class="md:hidden">
+                    <select id="mobile-nav" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#A3B18A] focus:border-[#A3B18A] block w-full p-2.5">
+                        <option value="home">护肤总览</option>
+                        <option value="pores">黑头与毛孔</option>
+                        <option value="whitening">美白与肤色</option>
+                        <option value="wrinkles">抗皱与嫩肤</option>
+                    </select>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <!-- Home Section -->
+        <section id="home" class="app-section space-y-8 section-fade-in">
+            <div class="text-center p-6 bg-white rounded-2xl shadow-sm">
+                <h2 class="text-3xl font-bold text-[#A3B18A] mb-2">欢迎来到科学护肤的世界</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">本指南将帮助您理解皮肤问题的根源，并提供基于科学的解决方案。探索下方的主题，或通过导航选择您最关心的问题，开启您的健康肌肤之旅。</p>
+            </div>
+
+            <div class="p-6 bg-white rounded-2xl shadow-sm">
+                <h3 class="text-2xl font-semibold text-center mb-6">护肤的金三角：一切的基础</h3>
+                <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">无论您的皮肤类型或具体问题如何，所有有效的护肤方案都建立在三个核心支柱之上：温和清洁、充足保湿和严格防晒。这三者共同维护着皮肤屏障的健康，是解决一切问题的起点。</p>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                    <div class="text-center p-6 border-2 border-[#E29B7C]/50 rounded-xl max-w-xs hover:shadow-lg transition-shadow">
+                        <div class="text-4xl mb-2">💧</div>
+                        <h4 class="text-xl font-bold text-[#E29B7C]">温和清洁</h4>
+                        <p class="text-sm text-gray-500 mt-2">清除多余油脂、污垢和死皮细胞，但不过度剥夺皮肤天然油脂，为后续吸收做好准备。</p>
+                    </div>
+                    <div class="text-center p-6 border-2 border-[#A3B18A]/50 rounded-xl max-w-xs hover:shadow-lg transition-shadow">
+                        <div class="text-4xl mb-2">🛡️</div>
+                        <h4 class="text-xl font-bold text-[#A3B18A]">充足保湿</h4>
+                        <p class="text-sm text-gray-500 mt-2">补充并锁住水分，维持皮肤屏障功能，减少因干燥引起的出油、细纹和敏感。</p>
+                    </div>
+                     <div class="text-center p-6 border-2 border-[#f0c27b]/50 rounded-xl max-w-xs hover:shadow-lg transition-shadow">
+                        <div class="text-4xl mb-2">☀️</div>
+                        <h4 class="text-xl font-bold text-[#d9a04b]">严格防晒</h4>
+                        <p class="text-sm text-gray-500 mt-2">抵御紫外线，从根源上预防色素沉着、光老化和皱纹，是护肤中最重要的一步。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pores & Blackheads Section -->
+        <section id="pores" class="app-section hidden space-y-8 section-fade-in">
+            <div class="text-center p-6 bg-white rounded-2xl shadow-sm">
+                <h2 class="text-3xl font-bold text-[#A3B18A] mb-2">黑头与毛孔管理</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">本节将深入探讨黑头和毛孔粗大的成因，并介绍从日常护理到专业治疗的有效方法。了解如何科学地“疏通”和“紧致”您的毛孔。</p>
+            </div>
+            <div class="p-6 bg-white rounded-2xl shadow-sm">
+                <h3 class="text-xl font-semibold mb-4">💡 核心问题：毛孔堵塞与松弛</h3>
+                <p class="text-gray-600 mb-4">黑头是皮脂和死皮细胞堵塞毛孔后氧化变黑的结果。毛孔粗大则主要源于皮脂过量分泌撑大毛孔，以及皮肤老化导致毛孔周围失去支撑而松弛。两者密切相关，需要综合管理。</p>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg">
+                     <p class="text-sm text-gray-700">⚠️ <span class="font-semibold">请注意：</span>不要用手挤压黑头！这会损伤毛孔壁，导致毛孔永久性扩大，甚至引发炎症和疤痕。</p>
+                </div>
+            </div>
+            <div id="pores-solutions" class="space-y-6"></div>
+            <div id="pores-comparison" class="p-6 bg-white rounded-2xl shadow-sm"></div>
+        </section>
+
+        <!-- Whitening & Tone Section -->
+        <section id="whitening" class="app-section hidden space-y-8 section-fade-in">
+            <div class="text-center p-6 bg-white rounded-2xl shadow-sm">
+                <h2 class="text-3xl font-bold text-[#A3B18A] mb-2">美白与肤色提亮</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">肤色暗沉、色斑是常见的困扰。本节将解析黑色素的生成机制，并系统介绍如何通过有效成分和专业疗程，实现均匀、透亮的肤色。</p>
+            </div>
+             <div class="p-6 bg-white rounded-2xl shadow-sm">
+                <h3 class="text-xl font-semibold mb-4">💡 核心问题：黑色素生成与代谢</h3>
+                <p class="text-gray-600 mb-4">紫外线是激活黑色素细胞、导致色素沉着的最主要原因。此外，炎症、荷尔蒙、生活习惯也会影响肤色。美白的关键在于“抑制黑色素生成”和“加速已生成黑色素的代谢”。</p>
+                <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-700">☀️ <span class="font-semibold">防晒是美白的基石：</span>不谈防晒的美白都是徒劳。即使在室内或阴天，也需要坚持使用广谱防晒霜。</p>
+                </div>
+            </div>
+            <div id="whitening-solutions" class="space-y-6"></div>
+            <div id="whitening-comparison" class="p-6 bg-white rounded-2xl shadow-sm"></div>
+        </section>
+
+        <!-- Wrinkles & Anti-aging Section -->
+        <section id="wrinkles" class="app-section hidden space-y-8 section-fade-in">
+            <div class="text-center p-6 bg-white rounded-2xl shadow-sm">
+                <h2 class="text-3xl font-bold text-[#A3B18A] mb-2">抗皱与皮肤嫩肤</h2>
+                <p class="max-w-3xl mx-auto text-gray-600">皱纹是皮肤老化的标志。本节将解释皱纹从动态到静态的演变过程，并介绍如何通过刺激胶原蛋白再生、填充或放松肌肉来抚平岁月痕迹。</p>
+            </div>
+            <div class="p-6 bg-white rounded-2xl shadow-sm">
+                <h3 class="text-xl font-semibold mb-4">💡 核心问题：胶原流失与肌肉活动</h3>
+                <p class="text-gray-600 mb-4">皮肤老化导致胶原蛋白和弹性纤维减少，使皮肤失去支撑而松弛下陷，形成静态皱纹。而重复的面部表情肌肉活动则会形成动态皱纹（如鱼尾纹、抬头纹）。</p>
+                 <div class="flex items-center justify-center p-4 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-700">⏳ <span class="font-semibold">预防胜于治疗：</span>严格防晒和使用抗氧化、促进胶原再生的成分，是延缓皱纹出现的最有效方法。</p>
+                </div>
+            </div>
+            <div id="wrinkles-solutions" class="space-y-6"></div>
+            <div id="wrinkles-comparison" class="p-6 bg-white rounded-2xl shadow-sm"></div>
+        </section>
+
+    </main>
+
+    <!-- Modal -->
+    <div id="modal" class="modal fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 opacity-0 invisible">
+        <div class="modal-content bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95">
+            <div class="sticky top-0 bg-white p-4 border-b flex justify-between items-center z-10">
+                <h3 id="modal-title" class="text-xl font-bold"></h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
+            </div>
+            <div id="modal-body" class="p-6"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const data = {
+                pores: {
+                    title: "去除黑头与缩小毛孔",
+                    solutions: [
+                        { type: '居家方案', name: '水杨酸 (BHA)', mechanism: '亲脂性，能深入毛孔溶解油脂和角质，疏通堵塞。', advice: '从低浓度(0.5%-2%)开始，每周1-2次。注意保湿，避免与其他酸类同用。', rating: { '效果': 4, '温和度': 2, '便捷性': 5, '成本': 5 } },
+                        { type: '居家方案', name: '维A醇 (Retinol)', mechanism: '调节角质代谢，抑制皮脂分泌，促进胶原生成，长期使用可改善毛孔结构。', advice: '夜间使用，从低浓度建立耐受。必须严格防晒，孕妇禁用。', rating: { '效果': 5, '温和度': 2, '便捷性': 4, '成本': 4 } },
+                        { type: '居家方案', name: '烟酰胺', mechanism: '平衡油脂分泌，强化皮肤屏障，间接帮助缩小毛孔。', advice: '温和有效，适合多数肤质。从低浓度(2%-5%)开始，可与多数成分搭配。', rating: { '效果': 3, '温和度': 4, '便捷性': 5, '成本': 5 } },
+                        { type: '专业方案', name: '化学剥脱 (果酸换肤)', mechanism: '使用高浓度酸类剥脱老废角质，深层清洁毛孔，刺激皮肤新生。', advice: '专业操作，效果显著但有恢复期和风险。术后需严格防晒保湿。', rating: { '效果': 4, '温和度': 1, '便捷性': 2, '成本': 2 } },
+                        { type: '专业方案', name: '激光治疗 (皮秒/点阵)', mechanism: '通过光热或光震效应刺激真皮胶原蛋白再生，从根本上收紧毛孔。', advice: '效果持久，是改善老化性毛孔粗大的金标准。价格昂贵，需专业医生操作。', rating: { '效果': 5, '温和度': 2, '便捷性': 2, '成本': 1 } },
+                        { type: '专业方案', name: '海菲秀 (HydraFacial)', mechanism: '非侵入性仪器，通过涡旋技术深层清洁毛孔、吸出黑头，同时导入精华。', advice: '温和舒适，无恢复期，适合作为定期深层清洁保养。', rating: { '效果': 3, '温和度': 5, '便捷性': 2, '成本': 3 } }
+                    ]
+                },
+                whitening: {
+                    title: "脸部美白与提亮肤色",
+                    solutions: [
+                        { type: '居家方案', name: '维生素C', mechanism: '强效抗氧化剂，抑制酪氨酸酶活性，还原已生成的黑色素，提亮肤色。', advice: '白天使用可加强防晒效果。选择避光包装，易氧化。', rating: { '效果': 4, '温和度': 4, '便捷性': 5, '成本': 5 } },
+                        { type: '居家方案', name: '烟酰胺', mechanism: '多通路美白，抑制黑色素向角质细胞转移，加速代谢，并能抗糖化改善黄气。', advice: '功效全面，但高浓度需建立耐受。', rating: { '效果': 4, '温和度': 3, '便捷性': 5, '成本': 5 } },
+                        { type: '居家方案', name: '传明酸', mechanism: '抑制黑色素细胞的活性，有效预防和淡化色斑，尤其适合炎症后色素沉着。', advice: '性质稳定，温和，可早晚使用。', rating: { '效果': 3, '温和度': 5, '便捷性': 5, '成本': 4 } },
+                        { type: '专业方案', name: '光子嫩肤 (IPL)', mechanism: '宽光谱彩光选择性作用于色素团，将其击碎分解，改善色斑和肤色不均。', advice: '全面改善肤质，需按疗程治疗。术后注意防晒。', rating: { '效果': 4, '温和度': 3, '便捷性': 2, '成本': 3 } },
+                        { type: '专业方案', name: '皮秒激光', mechanism: '以极快速度和强大能量精准击碎黑色素颗粒，对各类色斑效果显著。', advice: '见效快，恢复期短，不易反黑。价格昂贵。', rating: { '效果': 5, '温和度': 3, '便捷性': 2, '成本': 1 } },
+                        { type: '居家方案', name: '熊果苷', mechanism: '抑制酪氨酸酶活性，从源头减少黑色素生成。', advice: '温和的美白选择，但需注意光稳定性，部分产品建议夜用。', rating: { '效果': 3, '温和度': 4, '便捷性': 5, '成本': 4 } }
+                    ]
+                },
+                wrinkles: {
+                    title: "脸部除皱与皮肤嫩肤",
+                    solutions: [
+                        { type: '居家方案', name: '维A醇 (Retinol)', mechanism: '抗老黄金标准。刺激胶原蛋白和弹性纤维新生，抚平细纹和皱纹。', advice: '效果显著，但刺激性强。务必从低浓度开始建立耐受，夜用并严格防晒。', rating: { '效果': 5, '温和度': 2, '便捷性': 4, '成本': 4 } },
+                        { type: '居家方案', name: '肽 (Peptides)', mechanism: '作为信号分子，刺激胶原蛋白生成，或抑制其分解。', advice: '温和，适合不能耐受维A醇的皮肤。种类繁多，效果不一。', rating: { '效果': 3, '温和度': 5, '便捷性': 5, '成本': 3 } },
+                        { type: '居家方案', name: '玻色因 (Pro-Xylane)', mechanism: '促进糖胺聚糖（GAGs）和胶原蛋白的合成，强韧皮肤结构，提升紧致度。', advice: '非常温和，无刺激性，适合长期维稳抗老。', rating: { '效果': 4, '温和度': 5, '便捷性': 5, '成本': 2 } },
+                        { type: '专业方案', name: '肉毒素注射', mechanism: '放松导致动态皱纹的肌肉，快速抚平眉间纹、鱼尾纹、抬头纹等。', advice: '针对动态纹效果立竿见影。需由专业医生操作，效果持续3-6个月。', rating: { '效果': 5, '温和度': 4, '便捷性': 1, '成本': 2 } },
+                        { type: '专业方案', name: '填充剂 (玻尿酸)', mechanism: '直接填充凹陷的皱纹和流失的组织（如法令纹），恢复面部饱满度。', advice: '针对静态纹和容量缺失效果好。对医生技术要求高。', rating: { '效果': 5, '温和度': 4, '便捷性': 1, '成本': 2 } },
+                        { type: '专业方案', name: '射频微针', mechanism: '微针结合射频热能，双重刺激深层胶原蛋白大量新生，全面提升紧致度、改善肤质。', advice: '全能型抗老项目，对松弛、皱纹、毛孔均有效。有恢复期。', rating: { '效果': 5, '温和度': 2, '便捷性': 2, '成本': 1 } }
+                    ]
+                }
+            };
+            
+            const navButtons = document.querySelectorAll('.nav-button');
+            const mobileNav = document.getElementById('mobile-nav');
+            const sections = document.querySelectorAll('.app-section');
+            const modal = document.getElementById('modal');
+            const closeModalBtn = document.getElementById('close-modal');
+
+            function showSection(targetId) {
+                sections.forEach(section => {
+                    section.classList.add('hidden');
+                });
+                const activeSection = document.getElementById(targetId);
+                if (activeSection) {
+                    activeSection.classList.remove('hidden');
+                }
+
+                navButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.target === targetId);
+                });
+                mobileNav.value = targetId;
+            }
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const targetId = button.dataset.target;
+                    showSection(targetId);
+                });
+            });
+
+            mobileNav.addEventListener('change', (e) => {
+                showSection(e.target.value);
+            });
+
+            function populateSolutions(category) {
+                const container = document.getElementById(`${category}-solutions`);
+                const comparisonContainer = document.getElementById(`${category}-comparison`);
+                if (!container || !comparisonContainer) return;
+
+                const solutionData = data[category].solutions;
+
+                const homeSolutions = solutionData.filter(s => s.type === '居家方案');
+                const proSolutions = solutionData.filter(s => s.type === '专业方案');
+
+                container.innerHTML = `
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 text-[#E29B7C]">🧪 居家方案 (成分护肤)</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${homeSolutions.map((s, i) => createSolutionCard(s, category, i)).join('')}
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 text-[#A3B18A]">⚕️ 专业方案 (医学美容)</h3>
+                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            ${proSolutions.map((s, i) => createSolutionCard(s, category, homeSolutions.length + i)).join('')}
+                        </div>
+                    </div>
+                `;
+
+                populateComparison(category);
+                
+                container.querySelectorAll('.solution-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const solData = data[category].solutions[card.dataset.index];
+                        openModal(solData);
+                    });
+                });
+            }
+            
+            function createSolutionCard(solution, category, index) {
+                return `
+                    <div class="solution-card bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-transparent hover:border-[#A3B18A]/50" data-category="${category}" data-index="${index}">
+                        <h4 class="font-bold text-lg">${solution.name}</h4>
+                        <p class="text-sm text-gray-500 mt-1">${solution.mechanism}</p>
+                    </div>
+                `;
+            }
+
+            function populateComparison(category) {
+                const container = document.getElementById(`${category}-comparison`);
+                const solutions = data[category].solutions;
+                container.innerHTML = `
+                    <h3 class="text-xl font-semibold mb-4 text-center">📊 方案对比</h3>
+                    <p class="text-center text-gray-500 mb-6">选择2-3个方案进行多维度对比，帮助您做出选择。</p>
+                    <div class="flex flex-wrap justify-center gap-2 mb-6" id="${category}-checkboxes">
+                        ${solutions.map((s, i) => `
+                            <div>
+                                <input type="checkbox" id="${category}-comp-${i}" value="${i}" class="hidden peer">
+                                <label for="${category}-comp-${i}" class="px-3 py-1 border rounded-full text-sm cursor-pointer transition-colors peer-checked:bg-[#A3B18A] peer-checked:text-white peer-checked:border-[#A3B18A]">
+                                    ${s.name}
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="${category}-chart"></canvas>
+                    </div>
+                `;
+                setupComparisonChart(category);
+            }
+
+            let charts = {};
+            function setupComparisonChart(category) {
+                const ctx = document.getElementById(`${category}-chart`).getContext('2d');
+                const checkboxes = document.querySelectorAll(`#${category}-checkboxes input[type="checkbox"]`);
+                
+                const chartConfig = {
+                    type: 'radar',
+                    data: {
+                        labels: ['效果', '温和度', '便捷性', '成本', '专业性'],
+                        datasets: []
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 5,
+                                pointLabels: { font: { size: 14 } },
+                                grid: { color: 'rgba(0,0,0,0.05)'},
+                                angleLines: { color: 'rgba(0,0,0,0.1)'}
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.r !== null) {
+                                            // Custom interpretation of cost
+                                            if (context.label === '成本') {
+                                                const costMap = {1: '极高', 2: '高', 3: '中', 4: '低', 5: '极低'};
+                                                label += costMap[context.parsed.r] || context.parsed.r;
+                                            } else if (context.label === '便捷性' || context.label === '专业性') {
+                                                const convenienceMap = {1: '极低', 2: '低', 3: '中', 4: '高', 5: '极高'};
+                                                label += convenienceMap[context.parsed.r] || context.parsed.r;
+                                            }
+                                            else {
+                                                label += context.parsed.r;
+                                            }
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                charts[category] = new Chart(ctx, chartConfig);
+                
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        updateChart(category);
+                    });
+                });
+
+                // Pre-select first two for initial view
+                if (checkboxes.length > 1) {
+                    checkboxes[0].checked = true;
+                    checkboxes[1].checked = true;
+                    updateChart(category);
+                }
+            }
+            
+            function updateChart(category) {
+                const selectedSolutions = [];
+                const checkboxes = document.querySelectorAll(`#${category}-checkboxes input:checked`);
+
+                if (checkboxes.length > 3) {
+                    checkboxes[checkboxes.length-1].checked = false;
+                    alert('最多选择3个进行对比。');
+                }
+                
+                document.querySelectorAll(`#${category}-checkboxes input:checked`).forEach(cb => {
+                    selectedSolutions.push(data[category].solutions[cb.value]);
+                });
+
+                const colors = ['rgba(163, 177, 138, 0.5)', 'rgba(226, 155, 124, 0.5)', 'rgba(240, 194, 123, 0.5)'];
+                const borderColors = ['rgb(163, 177, 138)', 'rgb(226, 155, 124)', 'rgb(240, 194, 123)'];
+                
+                charts[category].data.datasets = selectedSolutions.map((s, i) => {
+                    const isPro = s.type === '专业方案';
+                    const rating = s.rating;
+                    // Inverting cost for chart logic (5 is low cost, 1 is high cost visually)
+                    const costValue = 6 - rating['成本'];
+                    const convenienceValue = isPro ? 1 : 5;
+                    const professionalValue = isPro ? 5 : 1;
+                    
+                    return {
+                        label: s.name,
+                        data: [rating['效果'], rating['温和度'], rating['便捷性'], costValue, (isPro ? 5 : 2)],
+                        backgroundColor: colors[i % colors.length],
+                        borderColor: borderColors[i % borderColors.length],
+                        borderWidth: 2,
+                        pointBackgroundColor: borderColors[i % borderColors.length],
+                    };
+                });
+                
+                charts[category].update();
+            }
+
+            function openModal(solutionData) {
+                document.getElementById('modal-title').innerText = solutionData.name;
+                const isPro = solutionData.type === '专业方案';
+                const rating = solutionData.rating;
+
+                document.getElementById('modal-body').innerHTML = `
+                    <div class="space-y-4">
+                        <p class="text-sm font-semibold py-1 px-3 rounded-full inline-block ${isPro ? 'bg-[#A3B18A]/20 text-[#A3B18A]' : 'bg-[#E29B7C]/20 text-[#E29B7C]'}">${solutionData.type}</p>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">作用原理</h4>
+                            <p class="text-gray-600">${solutionData.mechanism}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">使用建议与注意事项</h4>
+                            <p class="text-gray-600">${solutionData.advice}</p>
+                        </div>
+                        <div>
+                           <h4 class="font-semibold text-gray-800 mb-2">多维度评估</h4>
+                           <div class="space-y-2">
+                                ${createRatingBar('效果', rating['效果'])}
+                                ${createRatingBar('温和度', rating['温和度'])}
+                                ${createRatingBar('便捷性', rating['便捷性'])}
+                                ${createRatingBar('成本', 6 - rating['成本'])}
+                           </div>
+                        </div>
+                    </div>
+                `;
+                modal.classList.remove('opacity-0', 'invisible');
+                modal.querySelector('.modal-content').classList.remove('scale-95');
+            }
+            
+            function createRatingBar(label, value) {
+                const color = value > 3 ? 'bg-green-500' : value > 1 ? 'bg-yellow-500' : 'bg-red-500';
+                const costLabel = label === '成本' ? '(高->低)' : '';
+                return `
+                    <div class="flex items-center">
+                        <span class="w-24 text-sm text-gray-600">${label} ${costLabel}</span>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="${color} h-2.5 rounded-full" style="width: ${value * 20}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function closeModal() {
+                modal.classList.add('opacity-0', 'invisible');
+                modal.querySelector('.modal-content').classList.add('scale-95');
+            }
+            
+            closeModalBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Initial population
+            populateSolutions('pores');
+            populateSolutions('whitening');
+            populateSolutions('wrinkles');
+        });
+    </script>
+</body>
+</html>
